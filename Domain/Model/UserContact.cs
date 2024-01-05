@@ -10,7 +10,7 @@ namespace Domain.Model
         public string LastName {  get; set; }
         public string Telephone {  get; set; }
         public string Description { get; set; }
-        public DateTime TimeCerated { get; set; }
+        public DateTime TimeCreated { get; set; }
 
     }
 }

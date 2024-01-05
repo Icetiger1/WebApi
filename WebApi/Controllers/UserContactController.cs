@@ -2,8 +2,8 @@
 using Domain.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using WebApiClassLibrary;
+using WebApi.Controllers;
 
 namespace WebApi.Controllers
 {
@@ -20,16 +20,24 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<UserContact>> Get(UserContact userContact)
+        public async Task<IEnumerable<UserContact>> Get()
         {
-            return await dataContext.Contacts.Take(10).ToListAsync();
+            return await dataContext.Contacts.ToListAsync();
         }
 
         [HttpGet("start={start}&end={end}")]
         public async Task<IEnumerable<UserContact>> Get(int start = 0, int end = 2)
         {
-            Range range = new Range(start, end);
-            var result = await dataContext.Contacts.Take(range).ToListAsync();
+            var t = dataContext
+                .Contacts
+                .OrderBy(e => e.TimeCreated)
+                .ToArray();
+
+            List<UserContact> result = new();
+            for (int i = start; i <= end; i++)
+            {
+                result.Add(t[i]);
+            }
 
             return result;
         }
@@ -37,14 +45,14 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<UserContact> Get(Guid id)
         {
-            var userContact = await dataContext.Contacts.FindAsync(id);
-            return userContact;
+            return await dataContext.Contacts.FindAsync(id);
         }
 
         [HttpPost]
         public async Task<bool> Append(UserContact userContact)
         {
             await dataContext.Contacts.AddAsync(userContact);
+
             return await dataContext.SaveChangesAsync() > 0;
         }
 
@@ -64,7 +72,7 @@ namespace WebApi.Controllers
             userContact.LastName = updateUserContact.LastName;
             userContact.Telephone = updateUserContact.Telephone;
             userContact.Description = updateUserContact.Description;
-            userContact.TimeCerated = updateUserContact.TimeCerated;
+            userContact.TimeCreated = updateUserContact.TimeCreated;
 
             //dataContext.Contacts.Update(updateUserContact);
             return await dataContext.SaveChangesAsync() > 0;

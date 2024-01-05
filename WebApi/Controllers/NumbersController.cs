@@ -12,11 +12,11 @@ namespace WebApi.Controllers
         {
         }
 
-        [HttpGet("gettimeutcnow")]
+        [HttpGet("GetTimeUtcNow")]
         public string Get() => base.dateTimeProvider.GetDateTime();
 
         [HttpGet(Name = "GetNumbers")]
         public IEnumerable<int> Get2() => new int[] { 1, 2, 3 };
-        }
+        
     }
 }
