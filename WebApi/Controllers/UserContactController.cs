@@ -4,29 +4,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiClassLibrary;
 using WebApi.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers
 {
-    public class UserContactController : CustomBaseController
+    [ApiController]
+    [Route("[controller]")]
+    public class UserContactController : Controller
     {
         private readonly DataContext dataContext;
 
-        public UserContactController(
-            IDateTimeServiceProvider dateTimeProvider, 
-            DataContext dataContext) 
-            : base(dateTimeProvider)
+        public UserContactController(DataContext dataContext)
         {
             this.dataContext = dataContext;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<UserContact>> Get()
+        public async Task<IEnumerable<UserContact>> GetAll()
         {
             return await dataContext.Contacts.ToListAsync();
         }
 
         [HttpGet("start={start}&end={end}")]
-        public async Task<IEnumerable<UserContact>> Get(int start = 0, int end = 2)
+        public async Task<IEnumerable<UserContact>> GetRange(int start = 0, int end = 2)
         {
             var t = dataContext
                 .Contacts
@@ -42,18 +42,26 @@ namespace WebApi.Controllers
             return result;
         }
 
-        [HttpGet]
-        public async Task<UserContact> Get(Guid id)
+        [HttpGet("{id}")]
+        public async Task<UserContact> GetOne(Guid id)
         {
             return await dataContext.Contacts.FindAsync(id);
         }
 
         [HttpPost]
-        public async Task<bool> Append(UserContact userContact)
+        public async Task<IActionResult> Append([FromBody] UserContact userContact)
         {
-            await dataContext.Contacts.AddAsync(userContact);
+            var contactExist = dataContext.Contacts.Any(e => e.FirsName == userContact.FirsName 
+                                                            && e.LastName == userContact.LastName);
+            if (contactExist == true)
+            {
+                return Ok(new { Message = "User Already Created" });
 
-            return await dataContext.SaveChangesAsync() > 0;
+            }
+
+            await dataContext.Contacts.AddAsync(userContact);
+            await dataContext.SaveChangesAsync();
+            return Ok(new { Message = "User Created" });
         }
 
         [HttpDelete("{id}")]
@@ -65,17 +73,13 @@ namespace WebApi.Controllers
         }
 
         [HttpPut]
-        public async Task<bool> Update(Guid Id, UserContact updateUserContact)
+        public async Task<IActionResult> Update([FromBody] UserContact updateUserContact)
         {
-            var userContact = await dataContext.Contacts.FindAsync(Id);
-            userContact.FirsName = updateUserContact.FirsName;
-            userContact.LastName = updateUserContact.LastName;
-            userContact.Telephone = updateUserContact.Telephone;
-            userContact.Description = updateUserContact.Description;
-            userContact.TimeCreated = updateUserContact.TimeCreated;
+            dataContext.Contacts.Update(updateUserContact);
 
-            //dataContext.Contacts.Update(updateUserContact);
-            return await dataContext.SaveChangesAsync() > 0;
+            await dataContext.SaveChangesAsync();
+
+            return Ok(new { Message = "User Updated" });
         }
     }
 }

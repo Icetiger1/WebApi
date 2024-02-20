@@ -7,16 +7,18 @@ namespace WebApi.Controllers
 {
     public class NumbersController : CustomBaseController
     {
-        public NumbersController(IDateTimeServiceProvider dateTimeProvider)
-            : base(dateTimeProvider)
+        protected readonly IDateTimeServiceProvider dateTimeProvider;
+
+        public NumbersController(IDateTimeServiceProvider dateTimeProvider) : base(dateTimeProvider) 
         {
         }
 
-        [HttpGet("GetTimeUtcNow")]
+        [HttpGet("gettimeutcnow")]
         public string Get() => base.dateTimeProvider.GetDateTime();
 
-        [HttpGet(Name = "GetNumbers")]
+        [HttpGet]
+        [Route("get")]
         public IEnumerable<int> Get2() => new int[] { 1, 2, 3 };
-        
+
     }
 }

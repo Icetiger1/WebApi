@@ -1,11 +1,12 @@
 ﻿using Domain.Service;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
-    public class CustomBaseController : Controller
+    public class CustomBaseController : ControllerBase
     {
         protected readonly IDateTimeServiceProvider dateTimeProvider;
 
