@@ -51,8 +51,10 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Append([FromBody] UserContact userContact)
         {
-            var contactExist = dataContext.Contacts.Any(e => e.FirsName == userContact.FirsName 
-                                                            && e.LastName == userContact.LastName);
+            var contactExist = dataContext
+                .Contacts
+                .Any(e => e.FirsName == userContact.FirsName 
+                          && e.LastName == userContact.LastName);
             if (contactExist == true)
             {
                 return Ok(new { Message = "User Already Created" });
